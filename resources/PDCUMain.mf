@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.7.0
+Created-By: 1.5.0_06-b05 (Sun Microsystems Inc.)
+Class-Path: swt.jar PDCUBoot.jar commons-net-1.4.1.jar cremex.jar 
+Main-Class: com.ottouk.pdcu.main.ui.PDCUSWT

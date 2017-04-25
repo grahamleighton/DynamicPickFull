@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="DynamicPick" basedir="." default="jar" >
+	
+	<property environment="env" />
+
+	<!--	<property name="build.home" value="C:/build" /> -->
+		
+		<!-- Obtain build.home  -->
+		<condition property="build.home" value="h:/build">
+			   <os family="windows"/>
+		</condition>
+		<condition property="build.home" value=".">
+			   <os family="unix"/>
+		</condition>
+
+		<fail unless="build.home">No build.home set for this OS!</fail>
+
+	<!-- property name="jre.dir" value="C:\Program Files\MyEclipse 6.0\jre\bin" /> -->
+	
+	<property name="jre.dir" value="C:\Program Files\Java\jdk1.6.0_05" />
+	
+	
+	
+		
+	
+	<!-- ================================================================ 
+
+	         Build application for the PDCU Version and Main Applications.
+
+	     ================================================================= -->
+
+	<property name="project.name" value="${ant.project.name}" />
+	
+	<property name="versionapp.name" value="PDCUBoot" />
+	<property name="versionmanifest.file" value="PDCUVersion.mf" />
+	
+	<property name="mainmanifest.file" value="PDCUMain.mf" />	
+	<property name="mainapp.name" value="PDCUMain" />
+	
+	<!-- Build Directory structure -->	
+	<property name="src.dir" value="src/com/ottouk/pdcu" />
+	<property name="versionsrc.dir" value="${src.dir}/version" />
+	<property name="mainsrc.dir" value="${src.dir}/main" />	
+	<property name="lib.dir" value="lib" />
+	<property name="resources.dir" value="resources" />	
+	<property name="build.dir" value="${build.home}/${project.name}" />
+	<property name="versionbuild.dir" value="${build.home}/${project.name}/version" />
+	<property name="mainbuild.dir" value="${build.home}/${project.name}/main" />
+	<property name="testbuild.dir" value="${build.home}/${project.name}/test" />
+	<property name="test.dir" value="test/com/ottouk" />
+	<property name="test.resources.dir" value="src/test/resources" />
+	
+	<!-- Versioning -->
+	<property name="build.info" value="${resources.dir}/buildinfo.properties" />
+		
+	<tstamp>
+		<format property="build.time" pattern="d-MMMM-yyyy HH:mm:ss" locale="en" />
+		<format property="file.date" pattern="d-MMMM-yyyy-H.mm.ss" locale="en,UK" />
+	</tstamp>
+	
+	<target name="versionfile">
+	<propertyfile file ="${build.info}" comment="Build Information File - DO NOT CHANGE">
+		<entry key="build.num" type="int" default="0000"
+		 operation="+" pattern="0000"/>
+		<entry key="build.date" type="date" value="now" 
+		  pattern="dd.MM.yyyy HH:mm"/>
+	</propertyfile>
+		
+		<property file = "${build.info}"/>
+		<echoproperties prefix="build."/>
+		
+		<replaceregexp file="${versionsrc.dir}/service/PDCUConstants.java"
+		match="@@@@"
+		replace="${boot.version}"/>
+
+		<replaceregexp file="${mainsrc.dir}/service/GeneralService.java"
+		match="@@@@"
+		replace="${main.version}"/>
+	</target>
+	
+	<target name="checkin-versionfile">
+		<cvs dest="${build.info}" command="update"/>
+	</target>
+	
+	<!-- Help -->
+	
+	<target name="help">
+		<echo message="" />
+		<echo message="${project.name} build file" />
+		<echo message="----------------------" />
+		<echo message="Available targets are:" />
+		<echo message="compile            --> Compile all (Main and Version) Java files" />
+		<echo message="compileversion     --> Compile Version Java files" />
+		<echo message="test               --> Runs JUnit tests" />
+		<echo message="jar                --> Package the apps (Main and Version) as JAR files" />
+		<echo message="jarversion         --> Package the Version app as a JAR file" />
+		<echo message="javadoc            --> Creates all Java Doc" />
+		<echo message="checkstyle         --> Runs checkstyle" />
+		<echo message="checkstyle-nightly --> Runs checkstyle and emails error reports" />
+		<echo message="clean              --> Deletes compiled classes, JAR " />
+	</target>
+
+	<path id="compile.classpath">
+		<fileset dir="${jre.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathelement location="${build.dir}/main/classes"/>
+		<pathelement location="${build.dir}/test/classes"/>
+		
+	</path>
+	
+	<target name="compileversion" depends="versionfile" description="Compile Version source tree java files">
+		<mkdir dir="${versionbuild.dir}/classes" />
+		<javac destdir="${versionbuild.dir}/classes" debug="true" optimize="false" deprecation="true" failonerror="true" source="1.3">
+			<src>
+				<path location="${versionsrc.dir}" />
+			</src>
+			<classpath>
+				<path refid="compile.classpath" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="compiletests" description="Compile all tests">	
+		<echoproperties prefix="jre.dir"/>
+		<mkdir dir="${testbuild.dir}/classes" />
+		<javac destdir="${testbuild.dir}/classes" debug="true" optimize="false" deprecation="true" failonerror="true">
+			<src path="${test.dir}" />
+			<classpath>
+				<path refid="compile.classpath" />
+				
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="jarversion" depends="compileversion" description="Packages Version application as jar">
+		<jar destfile="${build.dir}/${versionapp.name}-${boot.version}-${build.num}.jar" compress="true" manifest="${resources.dir}/${versionmanifest.file}">
+			<fileset dir="${versionbuild.dir}/classes" />
+		</jar>
+
+		<!-- Also copy any required jars -->
+		<copy todir="${build.dir}">
+			<fileset dir="${lib.dir}" includes="swt.jar" />
+			<fileset dir="${lib.dir}" includes="commons*.jar" />
+		</copy>
+	</target>
+	
+	<target name="compile" depends="jarversion" description="Compile Main source tree java files">
+            <mkdir dir="${mainbuild.dir}/classes" />
+	        <javac destdir="${mainbuild.dir}/classes" debug="true" optimize="false" deprecation="true" failonerror="true" source="1.3">
+	            <src>
+	                <path location="${mainsrc.dir}"   />
+	            	<!-- Get access to Version.jar methods-->
+	            	<path location="${versionsrc.dir}" />
+	            </src>
+	        	<exclude name="**\ConsolShell.java" />
+	            <classpath>
+	                <path refid="compile.classpath" />
+	            	<!-- Reference Version.jar -->
+	                <!-- <path location="${build.dir}/${versionapp.name}"/> -->
+	            </classpath>
+	        </javac>
+	</target>
+
+	<target name="jar" depends="compile" description="Packages Main application as jar">
+	        <jar destfile="${build.dir}/${mainapp.name}-${main.version}-${build.num}.jar" compress="true" manifest="${resources.dir}/${mainmanifest.file}">
+	            <fileset dir="${mainbuild.dir}/classes" />
+	        </jar>
+	</target>
+	
+	<target name="clean" description="Clean output directories">
+		<delete dir="${build.dir}" />
+	</target>
+	
+	<!-- ========================================================== -->
+	<!-- Generate JavaDoc                                                                                                                   -->
+	<!-- ========================================================== -->
+	<target name="javadoc" description="Generates Javadoc.">
+		<mkdir dir="docs" />
+        <javadoc packagenames="com.ottouk.pdcu.*"
+		         excludepackagenames="com.ottouk.dynamicpick.useful.**"
+		         destdir="docs"
+	             author="true"
+	             version="true"
+	             use="true"
+	             public="true"
+	             stylesheetfile="docs/jdstyle.css"
+	             windowtitle="Dynamic Pick">
+			<sourcepath>
+	        	<pathelement location="src" />
+			</sourcepath>
+	        <group title="Dynamic Pick"
+	        	   packages="com.ottouk.pdcu.*" />
+	        <classpath refid="compile.classpath" />
+	        <doctitle>
+	        	<![CDATA[<h1>PDCU Replacement</h1>]]>
+	        </doctitle>
+	        <bottom>
+	        	<![CDATA[<i>Copyright &#169; 2008 <a href="http://www.otto-uk.com">otto uk</a>.  All Rights Reserved.</i>]]>
+	        </bottom>
+        	<link href="http://java.sun.com/j2se/1.5/docs/api" />
+		</javadoc>
+	</target>
+	
+	<!-- Test Phase -->
+	<target name="executetests" description="Executes junit tests, reports on failures">
+		<mkdir dir="${build.dir}/test/output" />
+		<junit printsummary="false" haltonfailure="true" failureproperty="executetests.failure">
+			<classpath refid="compile.classpath"/>
+		      <formatter type="brief" usefile="false"/>
+			  <formatter type="xml"/>
+			
+				<!--	<test name="com.ottouk.pdcu.version.TestLogonController"/> -->
+						
+		    <!--  <batchtest todir= "${build.dir}/test/output" > -->
+		     <batchtest todir="${build.dir}/test/output" >
+		        <fileset dir="${build.dir}/test/classes" includes="**/*TestLogonController.class" />
+		     </batchtest>		      
+	    </junit>
+<!-- Let Hudson publish the results
+
+		<junitreport todir= "C:/Documents and Settings/dis114.OTTOUK/.hudson/jobs/PDCU Automated Build/workspace/DynamicPick/test/">
+			<fileset dir ="${build.dir}/test/output" includes="TEST-*.xml"/> 
+			<report format="frames" todir="${build.dir}/test/output"/>
+		</junitreport>
+-->
+	</target>
+	
+<!-- Let Hudson mail the errors.
+	
+	<target name="tests-nightly"
+	        depends="executetests"
+	        if="executetests.failure"
+	        description="Sends email if any tests failed.">
+		
+			<mail from="executetests@PDCU.com"
+	          tolist="paul.gibbs@otto-uk.com"
+	          mailhost="172.16.32.86"
+	          subject="Junit Test Failures in project ${project.name}"
+			  messagemimetype="text/html"
+			  messageFile="${build.dir}/test/errorslink.html"/>
+			<fail message="tests failed" />
+	</target>
+-->
+	<!-- CheckStyle -->
+	
+	<taskdef resource="checkstyletask.properties"
+		         classpath="lib/checkstyle-all-4.4.jar" />
+
+	<target name="checkstyle"
+	        description="Generates a report of code convention violations.">
+		<checkstyle config="resources/PDCUCheckstyle.xml"
+	                failureProperty="checkstyle.failure"
+	                failOnViolation="false">
+	    	<formatter type="plain" tofile="resources/checkstyle_report.txt" />
+	    	<fileset dir="src" includes="**/*.java" />
+		</checkstyle>
+	</target>
+
+	<!-- run this target as part of automated build -->
+	<target name="checkstyle-nightly"
+	        depends="checkstyle"
+	        if="checkstyle.failure"
+	        description="Sends email if checkstyle detected code conventions violations.">
+		
+			<mail from="checkstyle@PDCU.com"
+	          tolist="paul.gibbs@otto-uk.com"
+	          mailhost="172.16.32.86"
+	          subject="Checkstyle violation(s) in project ${project.name}"
+	          files="resources/checkstyle_report.txt" />
+			  <!--<fail message="checkstyle failed" />-->
+	</target>
+
+</project>
