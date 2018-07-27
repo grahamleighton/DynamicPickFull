@@ -20,6 +20,9 @@ import org.eclipse.swt.widgets.Text;
 
 //import com.ottouk.pdcu.main.domain.StockAudit;
 //import com.ottouk.pdcu.main.service.LogonService;
+import com.ottouk.pdcu.main.service.LocationDetailService;
+import com.ottouk.pdcu.main.service.LocationDetailServiceImpl;
+import com.ottouk.pdcu.main.service.MainConstants;
 import com.ottouk.pdcu.main.service.StockAuditService;
 import com.ottouk.pdcu.main.service.StockAuditServiceImpl;
 import com.ottouk.pdcu.main.utils.StringUtils;
@@ -28,6 +31,7 @@ import com.ottouk.pdcu.main.utils.StringUtils;
 public class StockAuditShell extends GeneralShell {
 
 	private StockAuditService stockauditService;
+	private LocationDetailService locService;
 //	private StockAudit stock;
 	//private StockAuditServiceImpl st;
 	private String numeric;
@@ -107,6 +111,7 @@ public class StockAuditShell extends GeneralShell {
 
 		while (true) {
 			if (logonService.startStockAudit()) {
+				locService = new LocationDetailServiceImpl();
 				stockauditService = new StockAuditServiceImpl();
 				return true;
 			} else {
@@ -388,13 +393,12 @@ public class StockAuditShell extends GeneralShell {
                                             numeric = "0" + numeric;
 
                     //StringUtils.log ("show Alpha Location on Scan Location Page ");
-                    StringUtils.log ("Scan + alphaLocation");
+                  
                     
                     lStockPI.setText(" Scan " + stockauditService.getAlphaLocation(counts).substring(0, 4) + "-" +stockauditService.getAlphaLocation(counts) .substring(4));
                     
                     
-                    System.out.println (stockauditService.getAlphaLocation (counts));
-                    System.out.println(numeric);
+                   
 
                     if (layout.topControl != pScanLocation) {
                             layout.topControl = pScanLocation;
@@ -402,19 +406,26 @@ public class StockAuditShell extends GeneralShell {
                             shell.setDefaultButton(bScanLocationOK);
                             resetTitle(STOCK_AUDIT_TITLE);
                             
-                            tScanLocation.addListener(SWT.Verify, new Listener() {
-              			      public void handleEvent(Event e) {
-              			        String string = e.text;
-              			        char[] chars = new char[string.length()];
-              			        string.getChars(0, chars.length, chars, 0);
-              			        for (int i = 0; i < chars.length; i++) {
-              			          if (!('0' <= chars[i] && chars[i] <= '9')) {
-              			            e.doit = false;
-              			            return;
-              			          }
-              			        }
-              			      }
-              			    });
+//                            tScanLocation.addListener(SWT.Verify, new Listener() {
+//              			      public void handleEvent(Event e) {
+//              			    	  String locScanned = e.text;
+//              			    	  
+//              			    	  if ( locScanned.equals(stockauditService.getAlphaLocation(counts))) {
+//              			    		  locScanned = StringUtils.padNumber( stockauditService.getNumericLocation(counts),7);
+//              			    	  }
+//              			    	  
+//              			    	  
+//              			        String string = locScanned;
+//              			        char[] chars = new char[string.length()];
+//              			        string.getChars(0, chars.length, chars, 0);
+//              			        for (int i = 0; i < chars.length; i++) {
+//              			          if (!('0' <= chars[i] && chars[i] <= '9')) {
+//              			            e.doit = false;
+//              			            return;
+//              			          }
+//              			        }
+//              			      }
+//              			    });
 
                     }
 
@@ -435,8 +446,24 @@ public class StockAuditShell extends GeneralShell {
 	//if the the PI type is equal to B then the showReasonCode() will open or 
 	// if it is not equal to B then another screen will open..
 	private void submitScanLocation(){	
-		if (tScanLocation.getText().length() == 8){
-			String middle_num = String.valueOf(tScanLocation.getText().substring(1,7));		
+		
+		String loc = tScanLocation.getText();
+		
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+		}
+		
+	//	System.out.println("Stock Audit using location");
+	//	System.out.println(loc);
+		
+		if (loc.length() == 8){
+			String middle_num = String.valueOf(loc.substring(1,7));		
                                         
                        if (middle_num.compareTo(numeric) == 0){
                     	   
@@ -524,7 +551,20 @@ public class StockAuditShell extends GeneralShell {
 
 	//this is the real code..
 	private void submitAndValidate (){
-		if (tScanLocation.getText().length()== 8){
+		
+		
+		  String locScanned = tScanLocation.getText();
+  	  
+		  if ( locService.isAlphaLocationValid(locScanned) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(locScanned) ) {
+					locScanned = locService.getNumericLocation8();
+				}
+			}
+		  
+		  
+		if (locScanned.length()== MainConstants.EIGHT) 
+		{
 			submitScanLocation();
 		
 		}else{

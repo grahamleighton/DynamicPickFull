@@ -20,7 +20,7 @@ public class ToteConsolServiceImpl extends GeneralServiceImpl
 	/**
 	 * A location object.
 	 */
-	private Location l;
+	private LocationImpl l;
 	
 	/**
 	 * The last located tote scanned.

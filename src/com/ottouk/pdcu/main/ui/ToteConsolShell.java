@@ -9,6 +9,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.ottouk.pdcu.main.service.LocationDetailService;
+import com.ottouk.pdcu.main.service.LocationDetailServiceImpl;
 import com.ottouk.pdcu.main.service.ToteConsolServiceImpl;
 import com.ottouk.pdcu.main.service.ToteConsolService;
 import com.ottouk.pdcu.main.service.MainConstants;
@@ -26,6 +28,8 @@ public class ToteConsolShell extends GeneralShell {
 	 * Instance of ToteConsolService.
 	 */
 	private ToteConsolService toteConsolService;
+	
+	private LocationDetailService locService;
 	/**
 	 * layout for GUI.
 	 */
@@ -163,6 +167,7 @@ public class ToteConsolShell extends GeneralShell {
 			if (logonService.startToteConsol()) {
 				
 				StringUtils.log(TOTE_CONSOL_TITLE + " started");
+				locService = new LocationDetailServiceImpl();
 				toteConsolService = new ToteConsolServiceImpl();
 				return true;
 			} else {
@@ -393,8 +398,8 @@ public class ToteConsolShell extends GeneralShell {
 	 * Shows the location on screen and prompts user to scan location.
 	 */
 	private void showLocationConfirmPage() {
-		StringUtils.log("Location Confirm Page");
-		StringUtils.log(toteConsolService.getLocationObj().getAlphaLocation());
+	
+		
 		lConfirm.setText("Scan " 
 				+ toteConsolService.getLocationObj().getDisplayLocation());
 	
@@ -412,10 +417,22 @@ public class ToteConsolShell extends GeneralShell {
 	 * Validates the confirmed location.
 	 */
 	private void confirmLocationSubmit() {
-		StringUtils.log("confirmLocationSubmit");
-		StringUtils.log(tConfirm.getText());
+	
+		String loc = tConfirm.getText();
 		
-		if (toteConsolService.confirmLocation(tConfirm.getText())) {
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+		}
+		
+		
+		
+		if (toteConsolService.confirmLocation(loc)) {
 			showCollectTote();
 		} else {
 			errorBox("Wrong Location");
@@ -427,8 +444,7 @@ public class ToteConsolShell extends GeneralShell {
 	 * Validates the empty tote scanned.
 	 */
 	private void emptyToteSubmit() {
-		StringUtils.log("emptyToteSubmit");
-		StringUtils.log(tEmptyTote.getText());
+	
 		
 		if (toteConsolService.setTrolleyTote(tEmptyTote.getText())) {
 			showLocationConfirmPage();
@@ -463,11 +479,23 @@ public class ToteConsolShell extends GeneralShell {
 	 */
 	private void startPageSubmit() {
 		
-		StringUtils.log(tConsolStart.getText());
+		
+		String loc = tConsolStart.getText();
+		
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+		}
+		
 		if (toteConsolService.getLocationObj()
-				.validCheckDigit(tConsolStart.getText())) {
-			if (toteConsolService.getStartLocation(tConsolStart.getText())) {
-				StringUtils.log("got location");
+				.validCheckDigit(loc)) {
+			if (toteConsolService.getStartLocation(loc)) {
+				
 				showEmptyTotePage();
 //				showLocationConfirmPage();
 			} else {
@@ -482,8 +510,7 @@ public class ToteConsolShell extends GeneralShell {
 	 * Collects the tote in the location.
 	 */
 	private void totePageSubmit() {
-		StringUtils.log("totePageSubmit()");
-		StringUtils.log(tTote.getText());
+		
 		
 		if (tTote.getText().equalsIgnoreCase(
 				toteConsolService.getTrolleyTote())) {
@@ -502,8 +529,7 @@ public class ToteConsolShell extends GeneralShell {
 	 * Confirms the swap tote page actions.
 	 */
 	private void toteSwapSubmit() {
-		StringUtils.log("toteSwapSubmit()");
-		StringUtils.log(tSwap.getText());
+		
 
 		if (toteConsolService.getLocationObj().matchLocation(tSwap.getText())) {
 			if (toteConsolService.totePutaway(
@@ -532,8 +558,6 @@ public class ToteConsolShell extends GeneralShell {
 	 * Validates the item scan in the trolley tote.
 	 */
 	private void itemPageSubmit() {
-		StringUtils.log("itemPageSubmit()");
-		StringUtils.log(tItem.getText());
 		
 		String itemScanned = tItem.getText();
 		
@@ -598,7 +622,7 @@ public class ToteConsolShell extends GeneralShell {
 	 * Collects the items into the tote.
 	 */
 	private void showCollectItemPage() {
-		StringUtils.log("showCollectItemPage");
+	
 		if (layout.topControl != pItemPage) {
 			layout.topControl = pItemPage;
 		    contentPanel.layout();

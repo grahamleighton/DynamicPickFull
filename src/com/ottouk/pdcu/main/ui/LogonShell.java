@@ -59,7 +59,7 @@ public class LogonShell extends GeneralShell {
 	private Button bMenuBack;
 	private Button bMenuEscapeNext;
 	private Button bMenuTopup;
-	private Button bMenuDummy;
+	private Button bMenuTopUp2;
 	public boolean ShowMenu2;
 	
 	private static final String LOGON_TITLE = "Logon";
@@ -101,9 +101,11 @@ public class LogonShell extends GeneralShell {
 				// Use supplied operator number.
 				// Default unitId from hostName.
 				// Use supplied versionFile.
+
 				showLogon = false;
 				ShowMenu2 = false;
 				operator = args[0];
+
 				versionFile = args[1];
 				return logon();
 			default:
@@ -122,13 +124,13 @@ public class LogonShell extends GeneralShell {
 			//System.out.println(args.length);
 			
 			//used to force the program to go back to the second page...
-			if (args.length > 0) {
-				if (args[0] == "1"){
-					ShowMenu2 = true;
-				} else {
-					ShowMenu2 = false;
-				}	
-			} 
+//			if (args.length > 0) {
+//				if (args[0] == "1"){
+//					ShowMenu2 = true;
+//				} else {
+//					ShowMenu2 = false;
+//				}	
+//			} 
 
 			
 //			if (args.length == 0) {
@@ -192,6 +194,8 @@ public class LogonShell extends GeneralShell {
 			performActivity(LogonService.RETURNSPUTAWAY);
 		} else if (event.widget == bMenuTopup) {
 			performActivity(LogonService.TOTE_TOP_UP);
+		} else if (event.widget == bMenuTopUp2) {
+			performActivity(LogonService.TOTE_TOP_UP2);
 		} else if (event.widget == bMenuOK) {
 			performActivity(tMenu.getText());
 		} else if (event.widget == bMore){
@@ -248,6 +252,7 @@ public class LogonShell extends GeneralShell {
 		bMenuCartonPutaway =  newButton(menuPage, "CPA");
 		
 		
+
 		bMore = newButton(menuPage,"More");
 		Group group = new Group(menuPage, SWT.NONE);
 		group.setText("Select Activity");
@@ -275,7 +280,8 @@ public class LogonShell extends GeneralShell {
 		bNextPageStock = newButton (NextPage, "PI");
 		bPIPicks = newButton (NextPage," PI Picks");
 		bMenuTopup = newButton (NextPage,"Top Up");
-		bMenuDummy = newButton (NextPage,"(Empty)");
+
+		bMenuTopUp2 = newButton (NextPage,"Top Up 2");
 		//bMenuBack = newButton (NextPage, "Back");
 	
 		
@@ -292,12 +298,16 @@ public class LogonShell extends GeneralShell {
 
 		tMenuNext = newText(Nextgroup, LogonService.ACTIVITY_LENGTH);
 		bMenuOKNext = newButton(Nextgroup, "OK");
-	
+
+
 		
 		bMenuEscapeNext = newButton(NextPage, "Back");
+
+
 		
 		// set start page
 		if (showLogon) {
+
 			showLogonPage();
 		} else if (ShowMenu2) {
 			showNextPage();		
@@ -447,6 +457,12 @@ public class LogonShell extends GeneralShell {
 		    args[0] = "0";
 		    new LogonShell(args);
 			break;
+		case LogonService.TOTE_TOP_UP2:
+			shellClose();
+		    new ToteTopupShellDirected();
+		    args[0] = "0";
+		    new LogonShell(args);
+			break;
 		case LogonService.STOCK_CODE:
 			args[0] = "1";
 			shellClose();
@@ -542,7 +558,6 @@ public class LogonShell extends GeneralShell {
 			
 			if (logonOK) {
 				// Logon successful
-				StringUtils.log("logged on");
 				return true;
 			} else {
 
@@ -570,7 +585,6 @@ public class LogonShell extends GeneralShell {
 		while (true) {
 			if (logonService.logoff()) {
 				// Logoff successful
-				StringUtils.log("logged off");
 				break;
 			} else {
 

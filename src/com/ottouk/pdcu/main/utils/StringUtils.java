@@ -230,6 +230,34 @@ public final class StringUtils {
 	}
 	
 	/**
+	 * Extract and concatenate all the digits in a string.
+	 * 
+	 * @param str the string to be parsed
+	 * @return Integer
+	 */
+	public static String getNumbersFromString(String str) {
+		
+		if (str == null) {
+	        return null;
+	    }
+
+	    String strBuff = "";
+	    char c;
+	    
+	    for (int i = 0; i < str.length(); i++) {
+	        c = str.charAt(i);
+	        
+	        if (Character.isDigit(c)) {
+	            strBuff = strBuff + c;
+	        }
+	    }
+	    
+	    return strBuff;
+	    
+	}
+
+	
+	/**
 	 * String find and replace.
 	 * 
 	 * @param str the string to be searched 

@@ -5,7 +5,7 @@ import com.ottouk.pdcu.main.dao.Comms;
 public interface GeneralService {
 	
 	// Constants
-	String SOFTWARE_VERSION_NUMBER = "6.7";
+	String SOFTWARE_VERSION_NUMBER = "7.0";
 
 	// Return codes
 	int RC_OK = 0;

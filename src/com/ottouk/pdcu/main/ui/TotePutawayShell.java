@@ -9,12 +9,16 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.ottouk.pdcu.main.service.LocationDetailService;
+import com.ottouk.pdcu.main.service.LocationDetailServiceImpl;
 import com.ottouk.pdcu.main.service.TotePutawayService;
 import com.ottouk.pdcu.main.service.TotePutawayServiceImpl;
 
 public class TotePutawayShell extends GeneralShell {
 
 	private TotePutawayService totePutawayService;
+	private LocationDetailService locService;
+	
 	
 	private StackLayout layout;
 	
@@ -62,6 +66,7 @@ public class TotePutawayShell extends GeneralShell {
 		
 		while (true) {
 			if (logonService.startTotePutaway()) {
+				locService = new LocationDetailServiceImpl();
 				totePutawayService = new TotePutawayServiceImpl();
 				return true;
 			} else {
@@ -199,7 +204,21 @@ public class TotePutawayShell extends GeneralShell {
 	
 	private void submitPPutawayStart() {
 		
-		if (totePutawayService.locationRequest(tPutawayStart.getText())) {
+		String loc = tPutawayStart.getText();
+		
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+		}
+		System.out.println("Proceeding with Tote PA using location");
+		System.out.println(loc);
+
+		if (loc.length() > 0 && totePutawayService.locationRequest(loc)) {
 			showPPutawayTote();
 		} else {
 			errorBox();
@@ -219,7 +238,31 @@ public class TotePutawayShell extends GeneralShell {
 	
 	private void submitPPutawayLocation() {
 
-		if (totePutawayService.putaway(tPutawayLocation.getText())) {
+		String loc = tPutawayLocation.getText();
+		
+		System.out.println("Confirmed putaway to");
+		System.out.println(loc);
+		
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+			else
+			{
+				System.out.println("location not valid alpha location");
+			}
+		}
+
+		System.out.println("after Confirmed putaway to");
+		System.out.println(loc);
+		
+		
+		
+		if (totePutawayService.putaway(loc)) {
 			
 			if (totePutawayService.locationFollows()) {
 				showPPutawayTote();
@@ -242,7 +285,21 @@ public class TotePutawayShell extends GeneralShell {
 	
 	private void submitPPILocation() {
 
-		if (totePutawayService.validatePILocation(tPILocation.getText())) {
+		
+		String loc = tPILocation.getText();
+		
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+		}
+		System.out.println("Proceeding with Tote PI using location");
+		System.out.println(loc);
+		if (totePutawayService.validatePILocation(loc)) {
 			showPPITote();
 		} else {
 			errorBox();

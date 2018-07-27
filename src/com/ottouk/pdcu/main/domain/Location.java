@@ -13,6 +13,12 @@ public interface Location {
 	 */
 	void setLocation(String alpha, String num);
 	/**
+	 * Checks to see if the location passed is a valid alpha location
+	 * @param loc
+	 * @return
+	 */
+	boolean isAlphaLocationValid(String loc);
+	/**
 	 * Sets the Location fields by splitting the param into 2.
 	 * @param alphanum Location passed as 6 byte alpha 
 	 * followed by 6 byte numeric

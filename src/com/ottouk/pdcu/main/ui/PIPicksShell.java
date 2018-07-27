@@ -338,7 +338,6 @@ public class PIPicksShell extends GeneralShell {
 	
 	//@try need to amend this one...
 	private void submitNotFound(){	
-		StringUtils.log ("Location not found...");
 		String b = pipicksService.getAlphaLoc();
 		//String num_loc = pipicksService.getNumLoc();
 	status = "N";	
@@ -373,7 +372,7 @@ public class PIPicksShell extends GeneralShell {
 private void ItemNotfound(){
 			
 		 String a = pipicksService.getAlphaLoc();
-			StringUtils.log ("Item not found...");
+			
 			status = "N";	
 			String num_loc = pipicksService.getNumLoc();
 			if (pipicksService.send2(status))	{

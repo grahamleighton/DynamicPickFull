@@ -9,6 +9,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.ottouk.pdcu.main.service.LocationDetailService;
+import com.ottouk.pdcu.main.service.LocationDetailServiceImpl;
 import com.ottouk.pdcu.main.service.ToteAuditServiceImpl;
 import com.ottouk.pdcu.main.service.ToteAuditService;
 import com.ottouk.pdcu.main.service.MainConstants;
@@ -26,6 +28,10 @@ public class ToteAuditShell extends GeneralShell {
 	 * Instance of ToteAuditService.
 	 */
 	private ToteAuditService toteAuditService;
+	/***
+	 * Instance of LocationDetailService
+	 */
+	private LocationDetailService locService;
 	/**
 	 * layout for GUI.
 	 */
@@ -128,6 +134,7 @@ public class ToteAuditShell extends GeneralShell {
 			if (logonService.startToteAudit()) {
 				
 				StringUtils.log(TOTE_AUDIT_TITLE + " started");
+				locService = new LocationDetailServiceImpl();
 				toteAuditService = new ToteAuditServiceImpl();
 				return true;
 			} else {
@@ -157,32 +164,31 @@ public class ToteAuditShell extends GeneralShell {
 		if (event.widget == bEscape) {
 			escape();
 		} else if (event.widget == bToteOK) {
-			totePageSubmit();
+			submitTotePage();
 		} else if (event.widget == bItemOK) {
-			itemPageSubmit();
+			submitItemPage();
 		} else if (event.widget == bDone) {
-			StringUtils.log("Done button pressed");
-			
+						
 			if  (!toteAuditService.audit()) {
 				errorBox("Unexpected response");
 			} else { 
-				StringUtils.log(toteAuditService.getNumericLocation());
+			
 				if (toteAuditService.isLocationAvailable()) {
 					showLocationConfirmPage();
 				} else {	
 					infoBox("Tote Audit", "All locations PI'd");
-					showPIStartPage();
+					showStartPage();
 				}
 			}
 			
 		} else if (event.widget == bPIStartOK) {
-			startPageSubmit();
+			submitStartPage();
 		} else if (event.widget == bPIStartEscape) {
 			escape();
 		} else if (event.widget == bConfirmEscape) {
-			showPIStartPage();
+			showStartPage();
 		} else if (event.widget == bConfirmOK) {
-			confirmPageSubmit();
+			submitLocationConfirmPage();
 		}
 		
 	}
@@ -239,23 +245,9 @@ public class ToteAuditShell extends GeneralShell {
 		
 		lItemCount = newLabel(itemPage);
 		
-		showPIStartPage();
+		showStartPage();
 	}
-	/**
-	 * Called to validate the location entered.
-	 * if valid will call the Tote ID scan page
-	 * if not will error and re-show Location confirmation page
-	 */
-	private void confirmPageSubmit() {
-		
-		if (!toteAuditService.validatePILocation(tConfirm.getText())) {
-			errorBox("Wrong Location");
-			showLocationConfirmPage();
-		} else {
-			// correct location , prompt for tote id
-			showTotePage();
-		}
-	}
+	
 	/**
 	 * Standard error message routine.
 	 * @return return code from errorBox in GeneralShell
@@ -295,29 +287,7 @@ public class ToteAuditShell extends GeneralShell {
 		
 		shellClose();
 	}
-	/**
-	 * Adds the tote item scanned to the Tote.
-	 */
-	private void itemPageSubmit() {
-		
-		StringUtils.log(tItem.getText());
-		
-		if (toteAuditService.addItem(tItem.getText())) {
-				showItemPage();
-		} else {
-			// Error
-			
-			if ((toteAuditService.getReturnCode() 
-					== ToteAuditService.RC_WARN_MIS_SCAN)
-			|| (toteAuditService.getReturnCode()  
-					== ToteAuditService.RC_WARN_ITEM_PREVIOUSLY_USED)) {
-				beep();
-			} else {
-				errorBox("Scan Item/Tote");
-			}
-			showItemPage();
-		}
-	}
+
 	/**
 	 * Shows an information box indicating that no locations are available.
 	 * This can occur as a result of the initial scan i.e. there were no 
@@ -349,8 +319,8 @@ public class ToteAuditShell extends GeneralShell {
 	 * Shows the location on screen and prompts user to scan location.
 	 */
 	private void showLocationConfirmPage() {
-		StringUtils.log("Location Confirm Page");
-		StringUtils.log(toteAuditService.getAlphaLocation());
+		
+		
 		lConfirm.setText("Scan " + toteAuditService.getAlphaLocation());
 	
 		if (layout.topControl != confirmLocPage) {
@@ -363,29 +333,12 @@ public class ToteAuditShell extends GeneralShell {
 		tConfirm.setFocus();
 		
 	}
-	/**
-	 * Transacts with server to get the first location to PI.  
-	 * if server responds with a location will prompt user to
-	 * visit that location.
-	 * If server responds with no location will inform user that 
-	 * no locations are available
-	 */
-	private void startPageSubmit() {
-		
-		StringUtils.log("Tote request start location : " + tPIStart.getText());
-		if (toteAuditService.locationRequest(tPIStart.getText())) {
-			StringUtils.log("got location");
-			showLocationConfirmPage();
-		} else {
-			noLocationsBox();
-			showPIStartPage();
-		}
-	}
+	
 
 	/**
 	 * Shows the initial screen to collect the location starting point.
 	 */
-	private void showPIStartPage() {
+	private void showStartPage() {
 
 		if (layout.topControl != pPIStart) {
 			layout.topControl = pPIStart;
@@ -410,14 +363,95 @@ public class ToteAuditShell extends GeneralShell {
 		tTote.setText("");
 		tTote.setFocus();
 	}
+	
+	/**
+	 * Transacts with server to get the first location to PI.  
+	 * if server responds with a location will prompt user to
+	 * visit that location.
+	 * If server responds with no location will inform user that 
+	 * no locations are available
+	 */
+	private void submitStartPage() {
+		
+		String loc = tPIStart.getText();
+		
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+		}
+		
+		
+		if (toteAuditService.locationRequest(loc)) {
+		
+			showLocationConfirmPage();
+		} else {
+			noLocationsBox();
+			showStartPage();
+		}
+	}
+	/**
+	 * Adds the tote item scanned to the Tote.
+	 */
+	private void submitItemPage() {
+		
+		
+		
+		if (toteAuditService.addItem(tItem.getText())) {
+				showItemPage();
+		} else {
+			// Error
+			
+			if ((toteAuditService.getReturnCode() 
+					== ToteAuditService.RC_WARN_MIS_SCAN)
+			|| (toteAuditService.getReturnCode()  
+					== ToteAuditService.RC_WARN_ITEM_PREVIOUSLY_USED)) {
+				beep();
+			} else {
+				errorBox("Scan Item/Tote");
+			}
+			showItemPage();
+		}
+	}
+	/**
+	 * Called to validate the location entered.
+	 * if valid will call the Tote ID scan page
+	 * if not will error and re-show Location confirmation page
+	 */
+	private void submitLocationConfirmPage() {
+		
+		String loc = tConfirm.getText();
+		
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+		}
+		
+		if (!toteAuditService.validatePILocation(loc)) {
+			errorBox("Wrong Location");
+			showLocationConfirmPage();
+		} else {
+			// correct location , prompt for tote id
+			showTotePage();
+		}
+	}
 	/**
 	 * Called to validate the Tote ID scanned.
 	 * if valid will call the collect item page
 	 * if not will re-show the tote id collection page
 	 */
-	private void totePageSubmit() {
+	private void submitTotePage() {
 		
-		StringUtils.log(tTote.getText());
+		
 		toteAuditService.setToteId(tTote.getText());
 		if (toteAuditService.validatePITote(tTote.getText())) {
 			showItemPage();

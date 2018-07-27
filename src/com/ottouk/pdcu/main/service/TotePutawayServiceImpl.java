@@ -12,7 +12,14 @@ public class TotePutawayServiceImpl extends GeneralServiceImpl implements TotePu
 	private TotePutaway locationRequest;
 	private TotePutaway successful;
 	private TotePutaway pi;
+	private LocationImpl loc;
 	
+	
+	
+	public TotePutawayServiceImpl()
+	{
+		loc = new LocationImpl();
+	}
 	
 	public boolean locationRequest(String location) {
 		
@@ -199,6 +206,10 @@ public class TotePutawayServiceImpl extends GeneralServiceImpl implements TotePu
 	}
 	
 	private boolean validateLocation(String location) {
+		if ( loc.isAlphaLocationValid(location)) {
+			return true;
+		}
+		
 		//return Validate.mod10Check3131(location, LOCATION_LENGTH);
 		return Validate.mod10Check3131(location, LOCATION_LENGTH, LOCATION_PREFIX);
 	}

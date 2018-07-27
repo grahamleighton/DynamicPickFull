@@ -38,6 +38,8 @@ public interface LogonService extends GeneralService {
 	int RETURNSPUTAWAY = 23;
 	int STOCK_CODE = 48;
 	int TOTE_TOP_UP = 21;
+	int TOTE_TOP_UP2 = 212;
+	
 	
 	
 	//need to know the code for PI_PICKS

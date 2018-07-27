@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Text;
 import com.ottouk.pdcu.main.domain.CartonPutaway;
 import com.ottouk.pdcu.main.service.CartonPutawayService;
 import com.ottouk.pdcu.main.service.CartonPutawayServiceImpl;
+import com.ottouk.pdcu.main.service.LocationDetailService;
+import com.ottouk.pdcu.main.service.LocationDetailServiceImpl;
 
 
 
@@ -19,6 +21,7 @@ import com.ottouk.pdcu.main.service.CartonPutawayServiceImpl;
 public class CartonPutawayShell extends GeneralShell  {
 
 	private CartonPutawayService cartonPutawayService;
+	private LocationDetailService locService;
 
 	private StackLayout layout;
 
@@ -39,6 +42,8 @@ public class CartonPutawayShell extends GeneralShell  {
 	private Button bLocationNumberOK;
 	private Button bLocationNumberEscape;
 	private Button bPIComplete;
+	
+	private String numLocation;
 
 
 
@@ -49,6 +54,7 @@ public class CartonPutawayShell extends GeneralShell  {
 		while (true) {
 			if (logonService.startCartonPutaway()) {
 				System.out.println(CARTON_PUTAWAY_TITLE + " started");
+				locService = new LocationDetailServiceImpl();
 				cartonPutawayService = new CartonPutawayServiceImpl();
 				return true;
 			} else {
@@ -128,7 +134,7 @@ public class CartonPutawayShell extends GeneralShell  {
 
 
 		// set start page
-		System.out.println("createContents CPA End");
+	//	System.out.println("createContents CPA End");
 		showPPutawayStart();
 	}
 
@@ -233,15 +239,30 @@ public class CartonPutawayShell extends GeneralShell  {
 		// System.out.println(tCartonNumber.getText());
 
 		//i.)
-		if (tLocationNumber.getText().length()!= 2 && tLocationNumber.getText().length()!= 8){
-			errorBox("must be 2 or 8");
+		
+		String loc = tLocationNumber.getText();
+		
+		if ( loc.length() > 0 )
+		{
+			if ( locService.isAlphaLocationValid(loc) ) {
+				// Convert to numeric
+				if ( locService.getLocationDetails(loc) ) {
+					loc = locService.getNumericLocation8();
+				}
+			}
+		}
+		
+		numLocation = loc;
+		
+		if (loc.length()!= 2 && loc.length()!= 8){
+			errorBox("must be 2,6 or 8");
 			//causes the carton putaway page to appear in front.. 
 			showLocationNumberPage();	
 			return;
 		}
 
 		//ii.)
-		if (tLocationNumber.getText().equals(t)) {
+		if (loc.equals(t)) {
 			errorBox("Go back to Menu");
 			//function for the first screen here...
 			//System.out.println("System exited");
@@ -250,7 +271,7 @@ public class CartonPutawayShell extends GeneralShell  {
 		}
 
 		//iii.)
-		if (cartonPutawayService.LocationNumberValidation(tLocationNumber.getText())) {
+		if (cartonPutawayService.LocationNumberValidation(loc)) {
 			//errorBox("valid");
 			ValidateandMatchbarcode();
 			
@@ -266,7 +287,8 @@ public class CartonPutawayShell extends GeneralShell  {
 
 	//5.) function that get both the 6 digits of carton location and location number and validate it against each other.
 	private void ValidateandMatchbarcode(){
-		if (cartonPutawayService.validate(tCartonLocation.getText(), tLocationNumber.getText(), tCartonNumber.getText())){		
+		
+		if (cartonPutawayService.validate(tCartonLocation.getText(), numLocation, tCartonNumber.getText())){		
 			//errorBox ("Match!"); // go back to step 1.)
 			showPPutawayStart();
 			

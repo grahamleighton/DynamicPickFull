@@ -61,6 +61,14 @@ public final class MainConstants {
 	 */
 	public static final int MAX_ITEMS = 12;
 	/**
+	 * Constant "1".
+	 */
+	public static final int ONE = 1;
+	/**
+	 * Constant "2".
+	 */
+	public static final int TWO = 2;
+	/**
 	 * Constant "3".
 	 */
 	public static final int THREE = 3;
@@ -80,6 +88,10 @@ public final class MainConstants {
 	 * Constant "7".
 	 */
 	public static final int SEVEN = 7;
+	/**
+	 * Constant "8".
+	 */
+	public static final int EIGHT = 8;
 	/**
 	 * Constant "9".
 	 */

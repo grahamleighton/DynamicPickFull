@@ -29,16 +29,19 @@ public final class PDCUSWT {
 		
 		// Temp!!!
 		// If 3 args supplied, drop arg[0] (unitId).
+		
+		StringUtils.setDebug(true);
 		if (args.length < 1) {
 
 			if (System.getProperty("os.name").endsWith("")) {
 				// Windows XP
 //				args = new String[] { "7", "00249173", "C:\\Documents and Settings\\hstd004\\My Documents\\DynamicFull\\DynamicPickFull\\DynamicPickFull\\resources\\version.txt" };
-				args = new String[] { "7", "00472247", "h:\\vdi\\java\\Dynamic\\DynamicPickFull\\resources\\version.txt" };
+				args = new String[] { "0054", "00869031", "h:\\vdi\\java\\Dynamic\\DynamicPickFull\\resources\\version.txt" };
+//				args = new String[] { "0054", "00669253", "/Dynamic/Resources/version.txt" };
 				
 				} else {
 				// Windows CE
-				args = new String[] { "7", "00602043", "/Dynamic/Resources/version.txt" };
+				args = new String[] { "0001", "00669253", "/Dynamic/Resources/version.txt" };
 			}
 		}
 		
@@ -77,6 +80,7 @@ public final class PDCUSWT {
 		try {
 			if (AppLock.mainAppAlreadyRunning()) {
 				// Main app already running so exit!
+				StringUtils.log("App Already running"); 
 				System.exit(0);
 			} else {
 				// Run Main app
@@ -84,6 +88,8 @@ public final class PDCUSWT {
 				new LogonShell(args);
 			}
 		} catch (Exception e) {
+
+			
 			e.printStackTrace();
 			SplashScreen.show();
 		} finally {

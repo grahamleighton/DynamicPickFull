@@ -127,7 +127,7 @@ public class ToteBuildShell extends GeneralShell {
 	
 	private void totePageSubmit() {
 		
-		StringUtils.log(tTote.getText());
+	
 		
 		if (toteBuildService.addTote(tTote.getText())) {
 			// Tote added successfully
@@ -168,7 +168,7 @@ public class ToteBuildShell extends GeneralShell {
 	
 	private void itemPageSubmit() {
 		
-		StringUtils.log(tItem.getText());
+	
 		
 		if (toteBuildService.addScan(tItem.getText())) {
 			

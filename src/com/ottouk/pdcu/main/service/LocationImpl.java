@@ -2,6 +2,7 @@ package com.ottouk.pdcu.main.service;
 
 
 import com.ottouk.pdcu.main.domain.Location;
+import com.ottouk.pdcu.main.utils.StringUtils;
 import com.ottouk.pdcu.main.utils.Validate;
 
 /**
@@ -43,6 +44,192 @@ public class LocationImpl implements Location {
 	 */
 	public final String getAlphaLocation() {
 		return alpha;
+	}
+	
+	public final String getLocationString( String loc)
+	{
+		String loc2 = "";
+		if ( isNumericLocationValid(loc)) {
+			if (loc.length() == MainConstants.EIGHT ) {
+				loc2 = StringUtils.getString(loc,MainConstants.ONE,MainConstants.SEVEN);
+			}
+			else
+			{
+				loc2 = loc;
+			}
+		}
+		if ( isAlphaLocationValid(loc)) {
+			loc2 = loc;
+		}
+		
+		if ( loc2.length() == MainConstants.SIX )
+		{
+			return loc2;
+		}
+		
+		return "";
+		
+			
+		
+	}
+
+	public final boolean isNumericLocationValid(String loc)
+	{
+		String numberString = "";
+		
+		if ( loc.length() > 0 )
+		{
+			numberString = StringUtils.getNumbersFromString(loc);
+			if ( numberString.length() == loc.length() )
+			{
+				if ( numberString.length() == MainConstants.SIX ) {
+					return true;
+				}
+				if ( numberString.length() == MainConstants.EIGHT ) {
+					return true;
+				}
+				return false;
+			}
+		}
+		
+		return false;
+	}
+	
+	public final boolean isAlphaLocationValid(String loc)
+	{
+		if ( loc.length() != 6 )
+			return false;
+
+		String ch1 = loc.substring(0,1);    /* (A)A001A */
+		
+	
+		if ( ch1.equalsIgnoreCase("0")) return false;
+		if ( ch1.equalsIgnoreCase("1")) return false;
+		if ( ch1.equalsIgnoreCase("2")) return false;
+		if ( ch1.equalsIgnoreCase("3")) return false;
+		if ( ch1.equalsIgnoreCase("4")) return false;
+		if ( ch1.equalsIgnoreCase("5")) return false;
+		if ( ch1.equalsIgnoreCase("6")) return false;
+		if ( ch1.equalsIgnoreCase("7")) return false;
+		if ( ch1.equalsIgnoreCase("8")) return false;
+		if ( ch1.equalsIgnoreCase("9")) return false;
+
+		ch1 = loc.substring(1,2); 			/* A(A)001A */
+		
+		
+		if ( ch1.equalsIgnoreCase("0")) return false;
+		if ( ch1.equalsIgnoreCase("1")) return false;
+		if ( ch1.equalsIgnoreCase("2")) return false;
+		if ( ch1.equalsIgnoreCase("3")) return false;
+		if ( ch1.equalsIgnoreCase("4")) return false;
+		if ( ch1.equalsIgnoreCase("5")) return false;
+		if ( ch1.equalsIgnoreCase("6")) return false;
+		if ( ch1.equalsIgnoreCase("7")) return false;
+		if ( ch1.equalsIgnoreCase("8")) return false;
+		if ( ch1.equalsIgnoreCase("9")) return false;
+
+		ch1 = loc.substring(5,6);		/* AA001(A) */
+		
+		if ( ch1.equalsIgnoreCase("0")) return false;
+		if ( ch1.equalsIgnoreCase("1")) return false;
+		if ( ch1.equalsIgnoreCase("2")) return false;
+		if ( ch1.equalsIgnoreCase("3")) return false;
+		if ( ch1.equalsIgnoreCase("4")) return false;
+		if ( ch1.equalsIgnoreCase("5")) return false;
+		if ( ch1.equalsIgnoreCase("6")) return false;
+		if ( ch1.equalsIgnoreCase("7")) return false;
+		if ( ch1.equalsIgnoreCase("8")) return false;
+		if ( ch1.equalsIgnoreCase("9")) return false;
+
+		ch1 = loc.substring(2,3);		/* AA(0)01A */
+
+		if ( ch1.equalsIgnoreCase("A")) return false;
+		if ( ch1.equalsIgnoreCase("B")) return false;
+		if ( ch1.equalsIgnoreCase("C")) return false;
+		if ( ch1.equalsIgnoreCase("D")) return false;
+		if ( ch1.equalsIgnoreCase("E")) return false;
+		if ( ch1.equalsIgnoreCase("F")) return false;
+		if ( ch1.equalsIgnoreCase("G")) return false;
+		if ( ch1.equalsIgnoreCase("H")) return false;
+		if ( ch1.equalsIgnoreCase("I")) return false;
+		if ( ch1.equalsIgnoreCase("J")) return false;
+		if ( ch1.equalsIgnoreCase("K")) return false;
+		if ( ch1.equalsIgnoreCase("L")) return false;
+		if ( ch1.equalsIgnoreCase("M")) return false;
+		if ( ch1.equalsIgnoreCase("N")) return false;
+		if ( ch1.equalsIgnoreCase("O")) return false;
+		if ( ch1.equalsIgnoreCase("P")) return false;
+		if ( ch1.equalsIgnoreCase("Q")) return false;
+		if ( ch1.equalsIgnoreCase("R")) return false;
+		if ( ch1.equalsIgnoreCase("S")) return false;
+		if ( ch1.equalsIgnoreCase("T")) return false;
+		if ( ch1.equalsIgnoreCase("U")) return false;
+		if ( ch1.equalsIgnoreCase("V")) return false;
+		if ( ch1.equalsIgnoreCase("W")) return false;
+		if ( ch1.equalsIgnoreCase("X")) return false;
+		if ( ch1.equalsIgnoreCase("Y")) return false;
+		if ( ch1.equalsIgnoreCase("Z")) return false;
+		
+		ch1 = loc.substring(3,4);		/* AA0(0)1A */
+
+		if ( ch1.equalsIgnoreCase("A")) return false;
+		if ( ch1.equalsIgnoreCase("B")) return false;
+		if ( ch1.equalsIgnoreCase("C")) return false;
+		if ( ch1.equalsIgnoreCase("D")) return false;
+		if ( ch1.equalsIgnoreCase("E")) return false;
+		if ( ch1.equalsIgnoreCase("F")) return false;
+		if ( ch1.equalsIgnoreCase("G")) return false;
+		if ( ch1.equalsIgnoreCase("H")) return false;
+		if ( ch1.equalsIgnoreCase("I")) return false;
+		if ( ch1.equalsIgnoreCase("J")) return false;
+		if ( ch1.equalsIgnoreCase("K")) return false;
+		if ( ch1.equalsIgnoreCase("L")) return false;
+		if ( ch1.equalsIgnoreCase("M")) return false;
+		if ( ch1.equalsIgnoreCase("N")) return false;
+		if ( ch1.equalsIgnoreCase("O")) return false;
+		if ( ch1.equalsIgnoreCase("P")) return false;
+		if ( ch1.equalsIgnoreCase("Q")) return false;
+		if ( ch1.equalsIgnoreCase("R")) return false;
+		if ( ch1.equalsIgnoreCase("S")) return false;
+		if ( ch1.equalsIgnoreCase("T")) return false;
+		if ( ch1.equalsIgnoreCase("U")) return false;
+		if ( ch1.equalsIgnoreCase("V")) return false;
+		if ( ch1.equalsIgnoreCase("W")) return false;
+		if ( ch1.equalsIgnoreCase("X")) return false;
+		if ( ch1.equalsIgnoreCase("Y")) return false;
+		if ( ch1.equalsIgnoreCase("Z")) return false;
+		
+		ch1 = loc.substring(4,5);		/* AA00(1)A */
+
+		if ( ch1.equalsIgnoreCase("A")) return false;
+		if ( ch1.equalsIgnoreCase("B")) return false;
+		if ( ch1.equalsIgnoreCase("C")) return false;
+		if ( ch1.equalsIgnoreCase("D")) return false;
+		if ( ch1.equalsIgnoreCase("E")) return false;
+		if ( ch1.equalsIgnoreCase("F")) return false;
+		if ( ch1.equalsIgnoreCase("G")) return false;
+		if ( ch1.equalsIgnoreCase("H")) return false;
+		if ( ch1.equalsIgnoreCase("I")) return false;
+		if ( ch1.equalsIgnoreCase("J")) return false;
+		if ( ch1.equalsIgnoreCase("K")) return false;
+		if ( ch1.equalsIgnoreCase("L")) return false;
+		if ( ch1.equalsIgnoreCase("M")) return false;
+		if ( ch1.equalsIgnoreCase("N")) return false;
+		if ( ch1.equalsIgnoreCase("O")) return false;
+		if ( ch1.equalsIgnoreCase("P")) return false;
+		if ( ch1.equalsIgnoreCase("Q")) return false;
+		if ( ch1.equalsIgnoreCase("R")) return false;
+		if ( ch1.equalsIgnoreCase("S")) return false;
+		if ( ch1.equalsIgnoreCase("T")) return false;
+		if ( ch1.equalsIgnoreCase("U")) return false;
+		if ( ch1.equalsIgnoreCase("V")) return false;
+		if ( ch1.equalsIgnoreCase("W")) return false;
+		if ( ch1.equalsIgnoreCase("X")) return false;
+		if ( ch1.equalsIgnoreCase("Y")) return false;
+		if ( ch1.equalsIgnoreCase("Z")) return false;
+
+		
+		return true;
 	}
 	/**
 	 * Retrieves the alpha location in display format XX99-9X.

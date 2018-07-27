@@ -102,6 +102,8 @@
 		<echo message="jar                --> Package the apps (Main and Version) as JAR files" />
 		<echo message="jarversion         --> Package the Version app as a JAR file" />
 		<echo message="javadoc            --> Creates all Java Doc" />
+		<echo message="checkstyle         --> Runs checkstyle" />
+		<echo message="checkstyle-nightly --> Runs checkstyle and emails error reports" />
 		<echo message="clean              --> Deletes compiled classes, JAR " />
 	</target>
 
@@ -225,6 +227,73 @@
 		</javadoc>
 	</target>
 	
+	<!-- Test Phase -->
+	<target name="executetests" description="Executes junit tests, reports on failures">
+		<mkdir dir="${build.dir}/test/output" />
+		<junit printsummary="false" haltonfailure="true" failureproperty="executetests.failure">
+			<classpath refid="compile.classpath"/>
+		      <formatter type="brief" usefile="false"/>
+			  <formatter type="xml"/>
+			
+				<!--	<test name="com.ottouk.pdcu.version.TestLogonController"/> -->
+						
+		    <!--  <batchtest todir= "${build.dir}/test/output" > -->
+		     <batchtest todir="${build.dir}/test/output" >
+		        <fileset dir="${build.dir}/test/classes" includes="**/*TestLogonController.class" />
+		     </batchtest>		      
+	    </junit>
+<!-- Let Hudson publish the results
 
+		<junitreport todir= "C:/Documents and Settings/dis114.OTTOUK/.hudson/jobs/PDCU Automated Build/workspace/DynamicPick/test/">
+			<fileset dir ="${build.dir}/test/output" includes="TEST-*.xml"/> 
+			<report format="frames" todir="${build.dir}/test/output"/>
+		</junitreport>
+-->
+	</target>
+	
+<!-- Let Hudson mail the errors.
+	
+	<target name="tests-nightly"
+	        depends="executetests"
+	        if="executetests.failure"
+	        description="Sends email if any tests failed.">
+		
+			<mail from="executetests@PDCU.com"
+	          tolist="paul.gibbs@otto-uk.com"
+	          mailhost="172.16.32.86"
+	          subject="Junit Test Failures in project ${project.name}"
+			  messagemimetype="text/html"
+			  messageFile="${build.dir}/test/errorslink.html"/>
+			<fail message="tests failed" />
+	</target>
+-->
+	<!-- CheckStyle -->
+	
+	<taskdef resource="checkstyletask.properties"
+		         classpath="lib/checkstyle-all-4.4.jar" />
+
+	<target name="checkstyle"
+	        description="Generates a report of code convention violations.">
+		<checkstyle config="resources/PDCUCheckstyle.xml"
+	                failureProperty="checkstyle.failure"
+	                failOnViolation="false">
+	    	<formatter type="plain" tofile="resources/checkstyle_report.txt" />
+	    	<fileset dir="src" includes="**/*.java" />
+		</checkstyle>
+	</target>
+
+	<!-- run this target as part of automated build -->
+	<target name="checkstyle-nightly"
+	        depends="checkstyle"
+	        if="checkstyle.failure"
+	        description="Sends email if checkstyle detected code conventions violations.">
+		
+			<mail from="checkstyle@PDCU.com"
+	          tolist="paul.gibbs@otto-uk.com"
+	          mailhost="172.16.32.86"
+	          subject="Checkstyle violation(s) in project ${project.name}"
+	          files="resources/checkstyle_report.txt" />
+			  <!--<fail message="checkstyle failed" />-->
+	</target>
 
 </project>

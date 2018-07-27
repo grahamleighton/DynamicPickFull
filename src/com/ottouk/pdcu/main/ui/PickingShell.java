@@ -176,8 +176,6 @@ public class PickingShell extends GeneralShell {
 		
 		
 		int status = walkService.processWalkScan(tWalk.getText());
-		StringUtils.log("ProcessWalkScan Status");
-		StringUtils.log(status);
 		if (status != PickingService.RC_WALK_ADDED_OK) {
 			errorBox("Picking", walkService.getErrorMsg(status));
 			tWalk.setText("");
@@ -188,14 +186,10 @@ public class PickingShell extends GeneralShell {
 			lScanPrompt.setText("Scan Start Walk");
 			if (walkService.getWalk().compareTo("") != 0) {
 				msg = walkService.buildMessage('1');
-				StringUtils.log(msg);
 				lScanPrompt.setText("Scan End Walk");
-				StringUtils.log("Walk in class is  ");
-				StringUtils.log(walkService.getWalk());
 			} else {
 				String w = tWalk.getText().substring(0, eight);
 				msg = walkService.buildMessage(w, '9');
-				StringUtils.log(msg);
 			}
 			if (msg.length() > 0) {
 				if (!walkService.sendMessage(msg)) {

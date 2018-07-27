@@ -52,17 +52,24 @@ public class GeneralServiceImpl implements GeneralService {
 	}
 
 	public Integer getUnitId() {
+	
+		
 		return unitId;
 	}
 
 	public void setUnitId(Integer unitId) {
-		if (PDCUConstants.OS_WIN_XP) {
-			final int mid = 120;
-			final int tmpid = 4;
-			if (unitId.compareTo(Integer.valueOf(mid)) > 0) {
-				unitId = Integer.valueOf(tmpid);
-			}
-		}
+//		int mid = 120;
+//	int tmpid = 4;
+//		int tmid = 150;
+//		if (PDCUConstants.OS_WIN_XP) {
+			
+//			if (unitId.compareTo(Integer.valueOf(mid)) > 0) {
+//				unitId = Integer.valueOf(tmpid);
+//			}
+//			if (unitId.compareTo(Integer.valueOf(tmid)) > 0) {
+//			unitId = Integer.valueOf(tmpid);
+//			}
+//      }
 		GeneralServiceImpl.unitId = unitId;
 	}
 

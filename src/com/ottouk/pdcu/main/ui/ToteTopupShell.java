@@ -17,6 +17,8 @@ import org.eclipse.swt.widgets.Text;
 
 import com.ottouk.pdcu.main.service.ItemPutAwayServiceImpl;
 import com.ottouk.pdcu.main.service.ItemPutAwayService;
+import com.ottouk.pdcu.main.service.LocationDetailService;
+import com.ottouk.pdcu.main.service.LocationImpl;
 import com.ottouk.pdcu.main.service.MainConstants;
 import com.ottouk.pdcu.main.utils.StringUtils;
 import com.ottouk.pdcu.main.utils.Validate;
@@ -32,8 +34,20 @@ public class ToteTopupShell extends GeneralShell {
 	 * Instance of ItemPutawayService for server interface.
 	 */
 	private ItemPutAwayService ipaService;
+	private LocationDetailService locService;
+	private LocationImpl loc;
 	private static String LastItem;
 	private static int LastLength;
+	
+	/**
+	 * stores the current location alpha value
+	 */
+	private String locationAlpha;
+	
+	/**
+	 * stores the current location numeric value
+	 */
+	private String locationNumeric;
 	int ErrorNumber = 0;
 	/**
 	 * Layout.
@@ -143,6 +157,7 @@ public class ToteTopupShell extends GeneralShell {
 		while (true) {
 			if (logonService.startItemPutaway()) {
 				ipaService = new ItemPutAwayServiceImpl();
+				loc = new LocationImpl();
 				return true;
 			} else {
 				if (questionBox(TOPUP_TITLE,
@@ -265,6 +280,11 @@ public class ToteTopupShell extends GeneralShell {
 	private boolean validateLocation() {
 		boolean valid = true;
 		String str = tLocation.getText();
+		
+		if ( loc.isAlphaLocationValid(str)) {
+			return valid;
+		}
+		
 		if (str.length() != MainConstants.LOCATION_LENGTH) {
 			System.out.println("Length error : " + str.length() );
 			valid = false;
@@ -310,15 +330,69 @@ public class ToteTopupShell extends GeneralShell {
 			showItemStart();
 		}
 	}
+	
+	
+	private boolean interactGetLocation(String location) {
+//		locationAlpha = "RB001A";
+//		locationNumeric = "134001";
+		
+		ipaService.buildSendToteTopUpRequest(location,"L");
+		String reply = ipaService.getServerResponse();
+		String ResponseLocationAlpha = StringUtils.getString(reply,3,9);
+		String ResponseLocationNum = StringUtils.getString(reply,9,15);
+		
+//		System.out.println("Location Alpha :" + ResponseLocationAlpha);
+//		System.out.println("Location Num   :" + ResponseLocationNum);
+		
+		if ( ResponseLocationNum == null || ResponseLocationNum == "" )
+		{
+			locationAlpha = "";
+			locationNumeric = "";
+			return false;
+		}
+		else
+		{
+			locationAlpha = ResponseLocationAlpha;
+			locationNumeric = ResponseLocationNum;
+		}
+		
+		return true;
+		
+	}
+	
 	/**
 	 * Process location.
 	 */
 	private void submitLocation() {
+		
+		
+		
+		String locationScan = tLocation.getText();
+		
+		
+		
 		if (validateLocation()) {
 		
-			System.out.println("tItem");
-			System.out.println(tItem.getText());
-			ipaService.buildSendToteTopUp(tItem.getText(),tLocation.getText(),LastLength);
+//			System.out.println("tItem");
+//			System.out.println(tItem.getText());
+			
+			if ( loc.isAlphaLocationValid(locationScan))
+			{
+				locService.getLocationDetails(locationScan);
+				System.out.println("after");
+				System.out.println("getNumericLocation()");
+
+				System.out.println(locService.getNumericLocation());
+
+				System.out.println("getAlphaLocation()");
+				System.out.println(locService.getAlphaLocation());
+				String newLoc = "0" + locService.getNumericLocation() + "0";
+				ipaService.buildSendToteTopUp(tItem.getText(),newLoc, LastLength);
+			}
+			else
+			{
+				ipaService.buildSendToteTopUp(tItem.getText(),tLocation.getText(),LastLength);
+			}
 			topupCount = topupCount + 1;
 			
 			

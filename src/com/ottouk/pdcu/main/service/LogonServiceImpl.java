@@ -36,11 +36,15 @@ public class LogonServiceImpl extends GeneralServiceImpl implements LogonService
 	public boolean logon(String operator, String versionFile) {
 		
 		Integer unitId = StringUtils.extractNumbersFromString(getHostName());
+		
 		if ((unitId == null) || (unitId.toString().length() > 4)) {
 			// Unable to determine unitId from hostName
+			
 			setUnitId(unitId);	// this field required by error message
 			return returnCode(RC_ERROR_UNIT_ID);
 		} else {
+			
+			
 			return logon(unitId, operator, versionFile);
 		}
 	}
@@ -54,8 +58,11 @@ public class LogonServiceImpl extends GeneralServiceImpl implements LogonService
 			// Missing or invalid version file
 			return returnCode(RC_ERROR_VERSION_FILE);
 		} else {
+		
 			logon = createLogon(unitId, operator);
+		
 			
+		
 			// Add MainApp name and version to Logon record filler (logging aid)
 			logon.setFiller(StringUtils.split(version.getMainAppName(), ".jar") 
 					+ " " + LogonService.SOFTWARE_VERSION_NUMBER);
@@ -75,13 +82,18 @@ public class LogonServiceImpl extends GeneralServiceImpl implements LogonService
 	
 	private boolean logon() {
 		
+		
 		setUnitId(logon.getUnitId());
+	
 		setOperator(logon.getOperator());
+		
 
 		if (!connect(logon.getUnitId(), version.getServer(), version.getBasePort(), version.getChannels())) {
 			// Connection error
+		
 			return returnCode(RC_ERROR_CONNECT);
 		} else {
+		
 			boolean transactOK = transact(logon.buildLogon());
 			if (transactOK) {
 				logon.receiveResponse(getResponse());
